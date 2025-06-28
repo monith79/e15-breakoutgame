@@ -44,15 +44,31 @@ public class BricksManager : MonoBehaviour
 
     public List<int[,]> LevelsData { get; set; }
 
-    public int initialBrickCount { get; set; }
+    public int InitialBrickCount { get; set; }
 
     public int CurrentLevel;
+    internal static Action OnLevelLoaded;
 
     private void Start()
     {
         this.bricksContainer = new GameObject("BricksContainer");
         this.LevelsData = this.LoadLevelsData();
         this.GenerateBricks();
+    }
+
+        public void LoadLevel(int level)
+    {
+        this.CurrentLevel = level;
+        this.ClearRemainingBricks();
+        this.GenerateBricks();
+    }
+
+    private void ClearRemainingBricks()
+    {
+        foreach (Brick brick in this.RemainingBricks.ToList())
+        {
+            Destroy(brick.gameObject);
+        }
     }
 
     private void GenerateBricks()
@@ -87,8 +103,11 @@ public class BricksManager : MonoBehaviour
             currentSpawnY -= shiftAmount;
         }
 
-        this.initialBrickCount = this.RemainingBricks.Count;
+        this.InitialBrickCount = this.RemainingBricks.Count; // this.InitialBrickCount = this.RemainingBricks.Count;
+        OnLevelLoaded?.Invoke();
+
     }
+
 
     private List<int[,]> LoadLevelsData()
     {
@@ -124,21 +143,6 @@ public class BricksManager : MonoBehaviour
         }
 
         return levelsData;
-    }
-
-    public void LoadLevel(int level)
-    {
-        this.CurrentLevel = level;
-        this.ClearRemainingBricks();
-        this.GenerateBricks();
-    }
-
-    private void ClearRemainingBricks()
-    {
-        foreach(Brick brick in this.RemainingBricks.ToList())
-        {
-            Destroy(brick.gameObject);
-        }
     }
 
     public void LoadNextLevel()
