@@ -1120,6 +1120,9 @@ MonoBehaviour:
   defaultPaddleWidthInPixels: 200
   defaultLeftClamp: 135
   defaultRightClamp: 410
+  extendShrinkDuration: 10
+  paddleWidth: 2
+  paddleHeight: 0.28
 --- !u!1 &877651334
 GameObject:
   m_ObjectHideFlags: 0
@@ -1763,9 +1766,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AvailableBuffs:
   - {fileID: 5724232282402855759, guid: fb8df26fb26fb4540891ec635c5664f5, type: 3}
-  AvailableDebuffs: []
-  buffChance: 15
-  DebuffChance: 0
+  - {fileID: 6741699260424682922, guid: 78fa2280cd5634c46a6d2d5be4bfff3d, type: 3}
+  AvailableDebuffs:
+  - {fileID: 523460538470160797, guid: a1c4575648938e04a991cb3ce37cae2d, type: 3}
+  buffChance: 20
+  DebuffChance: 20
 --- !u!1 &1499901967
 GameObject:
   m_ObjectHideFlags: 0
