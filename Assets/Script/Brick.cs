@@ -6,6 +6,7 @@ using static UnityEngine.ParticleSystem;
 public class Brick : MonoBehaviour
 {
     private SpriteRenderer sr;
+    private BoxCollider2D boxCollider;
 
     public int Hitpoints = 1;
     public ParticleSystem DestroyEffect;
@@ -15,9 +16,34 @@ public class Brick : MonoBehaviour
     private void Awake()
     {
         this.sr = this.GetComponent<SpriteRenderer>();
+        this.boxCollider = this.GetComponent <BoxCollider2D>();
+        Ball.OnLightningBallEnable += OnLightningBallEnable;
+        Ball.OnLightningBallDisable += OnLightningBallDisable;
+    }
+
+    private void OnLightningBallDisable(Ball obj)
+    {
+        if (this != null)
+        {
+            this.boxCollider.isTrigger = false;
+        }
+    }
+
+    private void OnLightningBallEnable(Ball obj)
+    {
+        if(this != null)
+        {
+            this.boxCollider.isTrigger = true;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
+    {
+        Ball ball = collision.gameObject.GetComponent<Ball>();
+        ApplyCollisionLogic(ball);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision )
     {
         Ball ball = collision.gameObject.GetComponent<Ball>();
         ApplyCollisionLogic(ball);
@@ -27,7 +53,7 @@ public class Brick : MonoBehaviour
     {
         this.Hitpoints--;
 
-        if (this.Hitpoints <= 0)
+        if (this.Hitpoints <= 0 || (ball != null && ball.isLightningBall))
         {
             BricksManager.Instance.RemainingBricks.Remove(this);
             OnBrickDestruction?.Invoke(this);
@@ -91,11 +117,17 @@ public class Brick : MonoBehaviour
         Destroy(effect, DestroyEffect.main.startLifetime.constant);
     }
 
-    public void Init(Transform containerTransform, Sprite sprite, Color color, int hitPoints)
+    public void Init(Transform containerTransform, Sprite sprite, Color color, int hitpoints)
     {
         this.transform.SetParent(containerTransform);
         this.sr.sprite = sprite;
         this.sr.color = color;
-        this.Hitpoints = hitPoints; 
+        this.Hitpoints = hitpoints; 
+    }
+
+    private void OnDisable()
+    {
+        Ball.OnLightningBallEnable += OnLightningBallEnable;
+        Ball.OnLightningBallDisable += OnLightningBallDisable;
     }
 }
