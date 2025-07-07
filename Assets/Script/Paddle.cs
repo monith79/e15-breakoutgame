@@ -29,11 +29,17 @@ public class Paddle: MonoBehaviour
 
     private Camera mainCamera;
     private float paddleInitialY;
-    [SerializeField] private float defaultPaddleWidthInPixels = 200;
-    [SerializeField] private float defaultLeftClamp = 135;
-    [SerializeField] private float defaultRightClamp = 410;
+    private float defaultPaddleWidthInPixels = 200;
+    private float defaultLeftClamp = 135;
+    private float defaultRightClamp = 410;
     private SpriteRenderer sr;
     private BoxCollider2D boxCol;
+
+    // Shooting
+    public bool PaddleIsShooting { get; set; }
+    public GameObject leftMuzzle;
+    public GameObject rightMuzzle;
+    public Projectile bulletPrefab;
 
     public float extendShrinkDuration = 10;
     public float paddleWidth = 2;
@@ -51,6 +57,13 @@ public class Paddle: MonoBehaviour
     private void Update()
     {
         PaddleMovement();
+        UpdateMuzzlePosition();
+    }
+
+    private void UpdateMuzzlePosition()
+    {
+        leftMuzzle.transform.position = new Vector3(this.transform.position.x - (this.sr.size.x / 2) + 0.1f, this.transform.position.y + 0.2f, this.transform.position.z);
+        rightMuzzle.transform.position = new Vector3(this.transform.position.x - (this.sr.size.x / 2) - 0.153f, this.transform.position.y + 0.2f, this.transform.position.z);
     }
 
     public void StartWidthAnimation(float newWidth)
@@ -131,5 +144,63 @@ public class Paddle: MonoBehaviour
         }
     }
 
+    public void StartingShooting()
+    {
+        if (!this.PaddleIsShooting)
+        {
+            this.PaddleIsShooting = true;
+            StartCoroutine(StartShootingRoutine());
+        }
+    }
 
+    public IEnumerator StartShootingRoutine()
+    {
+        float fireCooldown = .5f; // TODO: extract this to unity virable
+        float fireCooldownLeft = 0;
+
+        float shootingDuration = 10; // TODO: extract this to unity variable
+        float shootingDurationLeft = shootingDuration;
+
+       /* Debug.Log("START SHOOTING");*/
+        
+        while (shootingDurationLeft >= 0)
+        {
+            fireCooldownLeft -= Time.deltaTime;
+            shootingDurationLeft -= Time.deltaTime;
+
+            if(fireCooldownLeft <= 0)
+            {
+                this.Shoot();
+                fireCooldownLeft = fireCooldown;
+                //Debug.Log($"Shoot at {Time.time}");
+            }
+
+            yield return null;
+
+        }
+        //Debug.Log("STOP SHOOTING!");
+        this.PaddleIsShooting=false;
+        leftMuzzle.SetActive(false);
+        rightMuzzle.SetActive(false);
+    }
+
+    private void Shoot()
+    {
+        leftMuzzle.SetActive(false);
+        rightMuzzle.SetActive(false);
+
+        leftMuzzle.SetActive(true);
+        rightMuzzle.SetActive(true);
+
+        this.SpawnBullet(leftMuzzle);
+        this.SpawnBullet(rightMuzzle);
+    }
+
+    private void SpawnBullet(GameObject muzzle)
+    {
+        Vector3 spawnPosition = new Vector3(muzzle.transform.position.x, muzzle.transform.position.y + 0.2f, muzzle.transform.position.z);
+        Projectile bullet = Instantiate(bulletPrefab, spawnPosition, Quaternion.identity);
+        Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
+        bulletRb.AddForce(new Vector2(0, 450f));
+    }
 }   
